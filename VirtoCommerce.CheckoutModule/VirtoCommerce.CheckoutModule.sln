@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.24720.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VirtoCommerce.CheckoutModule.Web", "VirtoCommerce.CheckoutModule.Web\VirtoCommerce.CheckoutModule.Web.csproj", "{5F7D8FDC-50A7-4557-8625-9D1FD8F1F07E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VirtoCommerce.CheckoutModule.Test", "VirtoCommerce.CheckoutModule.Test\VirtoCommerce.CheckoutModule.Test.csproj", "{E7CB8271-5592-4D8C-9B20-7F3E6645103A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VirtoCommerce.CheckoutModule.Data", "VirtoCommerce.CheckoutModule.Data\VirtoCommerce.CheckoutModule.Data.csproj", "{96030EB4-FD71-4F95-8E44-2065F6FAB52E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{5F7D8FDC-50A7-4557-8625-9D1FD8F1F07E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5F7D8FDC-50A7-4557-8625-9D1FD8F1F07E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5F7D8FDC-50A7-4557-8625-9D1FD8F1F07E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5F7D8FDC-50A7-4557-8625-9D1FD8F1F07E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E7CB8271-5592-4D8C-9B20-7F3E6645103A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E7CB8271-5592-4D8C-9B20-7F3E6645103A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E7CB8271-5592-4D8C-9B20-7F3E6645103A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E7CB8271-5592-4D8C-9B20-7F3E6645103A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{96030EB4-FD71-4F95-8E44-2065F6FAB52E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{96030EB4-FD71-4F95-8E44-2065F6FAB52E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{96030EB4-FD71-4F95-8E44-2065F6FAB52E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{96030EB4-FD71-4F95-8E44-2065F6FAB52E}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
