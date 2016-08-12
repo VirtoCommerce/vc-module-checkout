@@ -54,6 +54,7 @@ namespace VirtoCommerce.CheckoutModule.Data.Builders
 				cart = new ShoppingCart()
 				{
 					Name = "Default",
+					Currency = currency,
 					CustomerId = customerId,
 					CustomerName = customerName,
 					StoreId = storeId
