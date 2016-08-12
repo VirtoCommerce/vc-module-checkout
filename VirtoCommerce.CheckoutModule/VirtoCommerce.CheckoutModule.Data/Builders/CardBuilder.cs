@@ -4,6 +4,7 @@ using System.Linq;
 using VirtoCommerce.CheckoutModule.Data.Converters;
 using VirtoCommerce.CheckoutModule.Data.Model;
 using VirtoCommerce.CheckoutModule.Data.Reward;
+using VirtoCommerce.CheckoutModule.Data.Tax;
 using VirtoCommerce.Domain.Cart.Services;
 using VirtoCommerce.Domain.Store.Services;
 using VirtoCommerce.Domain.Tax.Model;
@@ -27,8 +28,6 @@ namespace VirtoCommerce.CheckoutModule.Data.Builders
 
 		private ShoppingCart _cart;
 
-		private Store _store;
-
 		[CLSCompliant(false)]
 		public CartBuilder(IStoreService storeService, IShoppingCartService shoppingShoppingCartService,
 			IShoppingCartSearchService shoppingCartSearchService, IMarketingPromoEvaluator marketingPromoEvaluator)
@@ -49,8 +48,6 @@ namespace VirtoCommerce.CheckoutModule.Data.Builders
 
 		public virtual ICartBuilder GetOrCreateNewTransientCart(string storeId, string customerId, string customerName, string currency, string languageCode)
 		{
-			_store = _storeService.GetById(storeId);
-
 			var cart = GetCurrentCart(storeId, customerId);
 			if (cart == null)
 			{
@@ -401,9 +398,11 @@ namespace VirtoCommerce.CheckoutModule.Data.Builders
 
 		public virtual ICollection<ShippingRate> GetAvailableShippingRates(TaxEvaluationContext taxEvaluationContext)
 		{
+			var store = _storeService.GetById(_cart.StoreId);
+
 			// TODO: Remake with shipmentId
 			var evalContext = new ShippingEvaluationContext(_cart);
-			var availableShippingRates = _store.ShippingMethods.Where(x => x.IsActive)
+			var availableShippingRates = store.ShippingMethods.Where(x => x.IsActive)
 				.SelectMany(x => x.CalculateRates(evalContext))
 				.Where(x => x.ShippingMethod == null || x.ShippingMethod.IsActive).ToArray();
 
@@ -428,7 +427,9 @@ namespace VirtoCommerce.CheckoutModule.Data.Builders
 
 		public virtual ICollection<PaymentMethod> GetAvailablePaymentMethods()
 		{
-			return _store.PaymentMethods.Where(x => x.IsActive).Select(x=>x.ToCartModel()).ToList();
+			var store = _storeService.GetById(_cart.StoreId);
+
+			return store.PaymentMethods.Where(x => x.IsActive).Select(x=>x.ToCartModel()).ToList();
 		}
 
 		public virtual ICartBuilder EvaluatePromotions(PromotionEvaluationContext promotionEvaluationContext)
@@ -438,17 +439,21 @@ namespace VirtoCommerce.CheckoutModule.Data.Builders
 			{
 				_cart.ApplyRewards(promotionResult.Rewards);
 			}
+
 			return this;
 		}
 
 		public ICartBuilder EvaluateTax(TaxEvaluationContext taxEvaluationContext)
 		{
-			var activeTaxProvider = _store.TaxProviders.FirstOrDefault(x => x.IsActive);
+			var store = _storeService.GetById(_cart.StoreId);
+
+			var activeTaxProvider = store.TaxProviders.FirstOrDefault(x => x.IsActive);
 			if (activeTaxProvider != null)
 			{
 				var taxRates = activeTaxProvider.CalculateRates(taxEvaluationContext);
-				//todo: _cart.ApplyTaxRates(taxResult.Select(x => x.ToWebModel(_cart.Currency)));
+				_cart.ApplyTaxeRates(taxRates);
 			}
+
 			return this;
 		}
 
