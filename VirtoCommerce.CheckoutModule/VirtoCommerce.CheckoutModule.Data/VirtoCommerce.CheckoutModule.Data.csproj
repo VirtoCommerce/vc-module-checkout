@@ -87,7 +87,10 @@
     <Compile Include="Builders\ICartValidator.cs" />
     <Compile Include="Converters\CartLineItemConverter.cs" />
     <Compile Include="Converters\PaymentMethodConverter.cs" />
+    <Compile Include="Converters\PromotionEvaluationContextConverter.cs" />
     <Compile Include="Converters\ShipmentConverter.cs" />
+    <Compile Include="Converters\TaxEvaluationContextConverter.cs" />
+    <Compile Include="Model\AddItemModel.cs" />
     <Compile Include="Model\AnonymousComparer.cs" />
     <Compile Include="Model\AsyncLock.cs" />
     <Compile Include="Model\CollectionExtensions.cs" />

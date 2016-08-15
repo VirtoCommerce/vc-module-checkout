@@ -25,12 +25,12 @@ namespace VirtoCommerce.CheckoutModule.Web.Controllers
 
 		[HttpGet]
 		[ResponseType(typeof(ShoppingCart))]
-		public IHttpActionResult GetCart(string storeId, string customerId, string customerName, string currency, string languageCode, PromotionEvaluationContext promotionEvaluationContext, TaxEvaluationContext taxEvaluationContext)
+		public IHttpActionResult GetCart(string storeId, string cartName, string customerId, string customerName, string currency, string languageCode)
 		{
-			_cartBuilder.GetOrCreateNewTransientCart(storeId, customerId, customerName, currency, languageCode);
+			_cartBuilder.GetOrCreateNewTransientCart(storeId, cartName, customerId, customerName, currency, languageCode);
 
-			_cartBuilder.EvaluateTax(taxEvaluationContext);
-			_cartBuilder.EvaluatePromotions(promotionEvaluationContext);
+			_cartBuilder.EvaluateTax();
+			_cartBuilder.EvaluatePromotions();
 			_cartValidator.Validate(_cartBuilder.Cart);
 
 			return Ok(_cartBuilder.Cart);
@@ -38,18 +38,18 @@ namespace VirtoCommerce.CheckoutModule.Web.Controllers
 
 		[HttpGet]
 		[ResponseType(typeof(int))]
-		public IHttpActionResult GetCartItemsCount(string storeId, string customerId, string customerName, string currency, string languageCode)
+		public IHttpActionResult GetCartItemsCount(string storeId, string cartName, string customerId, string customerName, string currency, string languageCode)
 		{
-			_cartBuilder.GetOrCreateNewTransientCart(storeId, customerId, customerName, currency, languageCode);
+			_cartBuilder.GetOrCreateNewTransientCart(storeId, cartName, customerId, customerName, currency, languageCode);
 
 			return Ok(_cartBuilder.Cart.Items.Count);
 		}
 
 		[HttpPost]
 		[ResponseType(typeof(int))]
-		public async Task<IHttpActionResult> AddItemToCart(string storeId, string customerId, string customerName, string currency, string languageCode, string id, int quantity = 1)
+		public async Task<IHttpActionResult> AddItemToCart(string storeId, string cartName, string customerId, string customerName, string currency, string languageCode, AddItemModel addItemModel)
 		{
-			_cartBuilder.GetOrCreateNewTransientCart(storeId, customerId, customerName, currency, languageCode);
+			_cartBuilder.GetOrCreateNewTransientCart(storeId, cartName, customerId, customerName, currency, languageCode);
 
 			using (await AsyncLock.GetLockByKey(GetAsyncLockCartKey(_cartBuilder.Cart.Id)).LockAsync())
 			{
@@ -59,6 +59,8 @@ namespace VirtoCommerce.CheckoutModule.Web.Controllers
 				//	_cartBuilder.AddItem(products.First(), quantity);
 				//	_cartBuilder.Save();
 				//}
+
+				_cartBuilder.AddItem(addItemModel).Save();
 			}
 
 			return Ok(_cartBuilder.Cart.Items.Count);
@@ -66,16 +68,16 @@ namespace VirtoCommerce.CheckoutModule.Web.Controllers
 
 		[HttpPut]
 		[ResponseType(typeof(void))]
-		public async Task<IHttpActionResult> ChangeCartItem(string storeId, string customerId, string customerName, string currency, string languageCode, string lineItemId, int quantity, PromotionEvaluationContext promotionEvaluationContext, TaxEvaluationContext taxEvaluationContext)
+		public async Task<IHttpActionResult> ChangeCartItem(string storeId, string cartName, string customerId, string customerName, string currency, string languageCode, string lineItemId, int quantity)
 		{
-			_cartBuilder.GetOrCreateNewTransientCart(storeId, customerId, customerName, currency, languageCode);
+			_cartBuilder.GetOrCreateNewTransientCart(storeId, cartName, customerId, customerName, currency, languageCode);
 
 			using (await AsyncLock.GetLockByKey(GetAsyncLockCartKey(_cartBuilder.Cart.Id)).LockAsync())
 			{
 				var lineItem = _cartBuilder.Cart.Items.FirstOrDefault(i => i.Id == lineItemId);
 				if (lineItem != null)
 				{
-					_cartBuilder.ChangeItemQuantity(lineItemId, quantity, promotionEvaluationContext, taxEvaluationContext);
+					_cartBuilder.ChangeItemQuantity(lineItemId, quantity);
 					_cartBuilder.Save();
 				}
 			}
@@ -84,13 +86,13 @@ namespace VirtoCommerce.CheckoutModule.Web.Controllers
 
 		[HttpDelete]
 		[ResponseType(typeof(int))]
-		public async Task<IHttpActionResult> RemoveCartItem(string storeId, string customerId, string customerName, string currency, string languageCode, string lineItemId, PromotionEvaluationContext promotionEvaluationContext, TaxEvaluationContext taxEvaluationContext)
+		public async Task<IHttpActionResult> RemoveCartItem(string storeId, string cartName, string customerId, string customerName, string currency, string languageCode, string lineItemId)
 		{
-			_cartBuilder.GetOrCreateNewTransientCart(storeId, customerId, customerName, currency, languageCode);
+			_cartBuilder.GetOrCreateNewTransientCart(storeId, cartName, customerId, customerName, currency, languageCode);
 
 			using (await AsyncLock.GetLockByKey(GetAsyncLockCartKey(_cartBuilder.Cart.Id)).LockAsync())
 			{
-				_cartBuilder.RemoveItem(lineItemId, promotionEvaluationContext, taxEvaluationContext);
+				_cartBuilder.RemoveItem(lineItemId);
 				_cartBuilder.Save();
 			}
 
@@ -99,13 +101,13 @@ namespace VirtoCommerce.CheckoutModule.Web.Controllers
 
 		[HttpPost]
 		[ResponseType(typeof(void))]
-		public async Task<IHttpActionResult> ClearCart(string storeId, string customerId, string customerName, string currency, string languageCode, PromotionEvaluationContext promotionEvaluationContext, TaxEvaluationContext taxEvaluationContext)
+		public async Task<IHttpActionResult> ClearCart(string storeId, string cartName, string customerId, string customerName, string currency, string languageCode)
 		{
-			_cartBuilder.GetOrCreateNewTransientCart(storeId, customerId, customerName, currency, languageCode);
+			_cartBuilder.GetOrCreateNewTransientCart(storeId, cartName, customerId, customerName, currency, languageCode);
 
 			using (await AsyncLock.GetLockByKey(GetAsyncLockCartKey(_cartBuilder.Cart.Id)).LockAsync())
 			{
-				_cartBuilder.Clear(promotionEvaluationContext, taxEvaluationContext);
+				_cartBuilder.Clear();
 				_cartBuilder.Save();
 			}
 
@@ -114,20 +116,20 @@ namespace VirtoCommerce.CheckoutModule.Web.Controllers
 
 		[HttpGet]
 		[ResponseType(typeof(ICollection<ShippingRate>))]
-		public IHttpActionResult GetCartShipmentAvailShippingRates(string storeId, string customerId, string customerName, string currency, string languageCode, string shipmentId, PromotionEvaluationContext promotionEvaluationContext, TaxEvaluationContext taxEvaluationContext)
+		public IHttpActionResult GetCartShipmentAvailShippingRates(string storeId, string cartName, string customerId, string customerName, string currency, string languageCode, string shipmentId)
 		{
-			_cartBuilder.GetOrCreateNewTransientCart(storeId, customerId, customerName, currency, languageCode);
+			_cartBuilder.GetOrCreateNewTransientCart(storeId, cartName, customerId, customerName, currency, languageCode);
 
-			var shippingMethods = _cartBuilder.GetAvailableShippingRates(taxEvaluationContext);
+			var shippingMethods = _cartBuilder.GetAvailableShippingRates();
 
 			return Ok(shippingMethods);
 		}
 
 		[HttpGet]
 		[ResponseType(typeof(ICollection<PaymentMethod>))]
-		public IHttpActionResult GetCartAvailPaymentMethods(string storeId, string customerId, string customerName, string currency, string languageCode)
+		public IHttpActionResult GetCartAvailPaymentMethods(string storeId, string cartName, string customerId, string customerName, string currency, string languageCode)
 		{
-			_cartBuilder.GetOrCreateNewTransientCart(storeId, customerId, customerName, currency, languageCode);
+			_cartBuilder.GetOrCreateNewTransientCart(storeId, cartName, customerId, customerName, currency, languageCode);
 
 			var paymentMethods = _cartBuilder.GetAvailablePaymentMethods();
 
@@ -136,13 +138,13 @@ namespace VirtoCommerce.CheckoutModule.Web.Controllers
 
 		[HttpPost]
 		[ResponseType(typeof(string))]
-		public async Task<IHttpActionResult> AddCartCoupon(string storeId, string customerId, string customerName, string currency, string languageCode, string couponCode, PromotionEvaluationContext promotionEvaluationContext, TaxEvaluationContext taxEvaluationContext)
+		public async Task<IHttpActionResult> AddCartCoupon(string storeId, string cartName, string customerId, string customerName, string currency, string languageCode, string couponCode)
 		{
-			_cartBuilder.GetOrCreateNewTransientCart(storeId, customerId, customerName, currency, languageCode);
+			_cartBuilder.GetOrCreateNewTransientCart(storeId, cartName, customerId, customerName, currency, languageCode);
 
 			using (await AsyncLock.GetLockByKey(GetAsyncLockCartKey(_cartBuilder.Cart.Id)).LockAsync())
 			{
-				_cartBuilder.AddCoupon(couponCode, promotionEvaluationContext, taxEvaluationContext);
+				_cartBuilder.AddCoupon(couponCode);
 				_cartBuilder.Save();
 			}
 
@@ -151,13 +153,13 @@ namespace VirtoCommerce.CheckoutModule.Web.Controllers
 
 		[HttpDelete]
 		[ResponseType(typeof(void))]
-		public async Task<IHttpActionResult> RemoveCartCoupon(string storeId, string customerId, string customerName, string currency, string languageCode, PromotionEvaluationContext promotionEvaluationContext, TaxEvaluationContext taxEvaluationContext)
+		public async Task<IHttpActionResult> RemoveCartCoupon(string storeId, string cartName, string customerId, string customerName, string currency, string languageCode)
 		{
-			_cartBuilder.GetOrCreateNewTransientCart(storeId, customerId, customerName, currency, languageCode);
+			_cartBuilder.GetOrCreateNewTransientCart(storeId, cartName, customerId, customerName, currency, languageCode);
 
 			using (await AsyncLock.GetLockByKey(GetAsyncLockCartKey(_cartBuilder.Cart.Id)).LockAsync())
 			{
-				_cartBuilder.RemoveCoupon(promotionEvaluationContext, taxEvaluationContext);
+				_cartBuilder.RemoveCoupon();
 				_cartBuilder.Save();
 			}
 
@@ -166,13 +168,13 @@ namespace VirtoCommerce.CheckoutModule.Web.Controllers
 
 		[HttpPost]
 		[ResponseType(typeof(void))]
-		public async Task<IHttpActionResult> AddOrUpdateCartShipment(string storeId, string customerId, string customerName, string currency, string languageCode, ShipmentUpdateModel shipment, PromotionEvaluationContext promotionEvaluationContext, TaxEvaluationContext taxEvaluationContext)
+		public async Task<IHttpActionResult> AddOrUpdateCartShipment(string storeId, string cartName, string customerId, string customerName, string currency, string languageCode, ShipmentUpdateModel shipment)
 		{
-			_cartBuilder.GetOrCreateNewTransientCart(storeId, customerId, customerName, currency, languageCode);
+			_cartBuilder.GetOrCreateNewTransientCart(storeId, cartName, customerId, customerName, currency, languageCode);
 
 			using (await AsyncLock.GetLockByKey(GetAsyncLockCartKey(_cartBuilder.Cart.Id)).LockAsync())
 			{
-				_cartBuilder.AddOrUpdateShipment(shipment, promotionEvaluationContext, taxEvaluationContext);
+				_cartBuilder.AddOrUpdateShipment(shipment);
 				_cartBuilder.Save();
 			}
 
@@ -181,9 +183,9 @@ namespace VirtoCommerce.CheckoutModule.Web.Controllers
 
 		[HttpPost]
 		[ResponseType(typeof(void))]
-		public async Task<IHttpActionResult> AddOrUpdateCartPayment(string storeId, string customerId, string customerName, string currency, string languageCode, PaymentUpdateModel payment)
+		public async Task<IHttpActionResult> AddOrUpdateCartPayment(string storeId, string cartName, string customerId, string customerName, string currency, string languageCode, PaymentUpdateModel payment)
 		{
-			_cartBuilder.GetOrCreateNewTransientCart(storeId, customerId, customerName, currency, languageCode);
+			_cartBuilder.GetOrCreateNewTransientCart(storeId, cartName, customerId, customerName, currency, languageCode);
 
 			using (await AsyncLock.GetLockByKey(GetAsyncLockCartKey(_cartBuilder.Cart.Id)).LockAsync())
 			{

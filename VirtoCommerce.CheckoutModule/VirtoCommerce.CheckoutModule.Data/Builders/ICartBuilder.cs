@@ -29,20 +29,20 @@ namespace VirtoCommerce.CheckoutModule.Data.Builders
 		/// Load or created new cart for current user and capture it
 		/// </summary>
 		/// <param name="customerName"></param>
+		/// <param name="cartName"></param>
 		/// <param name="currency"></param>
 		/// <param name="storeId"></param>
 		/// <param name="customerId"></param>
 		/// <param name="languageCode"></param>
 		/// <returns></returns>
-		ICartBuilder GetOrCreateNewTransientCart(string storeId, string customerId, string customerName, string currency, string languageCode);
+		ICartBuilder GetOrCreateNewTransientCart(string storeId, string cartName, string customerId, string customerName, string currency, string languageCode);
 
 		/// <summary>
 		/// Add new product to cart
 		/// </summary>
-		/// <param name="productId"></param>
-		/// <param name="quantity"></param>
+		/// <param name="addItemModel"></param>
 		/// <returns></returns>
-		ICartBuilder AddItem(string productId, int quantity, PromotionEvaluationContext promotionEvaluationContext, TaxEvaluationContext taxEvaluationContext);
+		ICartBuilder AddItem(AddItemModel addItemModel);
 
 		/// <summary>
 		/// Change cart item qty by product index
@@ -50,7 +50,7 @@ namespace VirtoCommerce.CheckoutModule.Data.Builders
 		/// <param name="lineItemId"></param>
 		/// <param name="quantity"></param>
 		/// <returns></returns>
-		ICartBuilder ChangeItemQuantity(string lineItemId, int quantity, PromotionEvaluationContext promotionEvaluationContext, TaxEvaluationContext taxEvaluationContext);
+		ICartBuilder ChangeItemQuantity(string lineItemId, int quantity);
 
 		/// <summary>
 		/// Change cart item qty by item id
@@ -58,35 +58,35 @@ namespace VirtoCommerce.CheckoutModule.Data.Builders
 		/// <param name="lineItemIndex"></param>
 		/// <param name="quantity"></param>
 		/// <returns></returns>
-		ICartBuilder ChangeItemQuantity(int lineItemIndex, int quantity, PromotionEvaluationContext promotionEvaluationContext, TaxEvaluationContext taxEvaluationContext);
+		ICartBuilder ChangeItemQuantity(int lineItemIndex, int quantity);
 
-		ICartBuilder ChangeItemsQuantities(int[] quantities, PromotionEvaluationContext promotionEvaluationContext, TaxEvaluationContext taxEvaluationContext);
+		ICartBuilder ChangeItemsQuantities(int[] quantities);
 
 		/// <summary>
 		/// Remove item from cart by id
 		/// </summary>
 		/// <param name="lineItemId"></param>
 		/// <returns></returns>
-		ICartBuilder RemoveItem(string lineItemId, PromotionEvaluationContext promotionEvaluationContext, TaxEvaluationContext taxEvaluationContext);
+		ICartBuilder RemoveItem(string lineItemId);
 
 		/// <summary>
 		/// Apply marketing coupon to captured cart
 		/// </summary>
 		/// <param name="couponCode"></param>
 		/// <returns></returns>
-		ICartBuilder AddCoupon(string couponCode, PromotionEvaluationContext promotionEvaluationContext, TaxEvaluationContext taxEvaluationContext);
+		ICartBuilder AddCoupon(string couponCode);
 
 		/// <summary>
 		/// remove exist coupon from cart
 		/// </summary>
 		/// <returns></returns>
-		ICartBuilder RemoveCoupon(PromotionEvaluationContext promotionEvaluationContext, TaxEvaluationContext taxEvaluationContext);
+		ICartBuilder RemoveCoupon();
 
 		/// <summary>
 		/// Clear cart remove all items and shipments and payments
 		/// </summary>
 		/// <returns></returns>
-		ICartBuilder Clear(PromotionEvaluationContext promotionEvaluationContext, TaxEvaluationContext taxEvaluationContext);
+		ICartBuilder Clear();
 
 		/// <summary>
 		/// Add or update shipment to cart
@@ -94,14 +94,14 @@ namespace VirtoCommerce.CheckoutModule.Data.Builders
 		/// <param name="updateModel"></param>
 		/// <param name="taxEvaluationContext"></param>
 		/// <returns></returns>
-		ICartBuilder AddOrUpdateShipment(ShipmentUpdateModel updateModel, PromotionEvaluationContext promotionEvaluationContext, TaxEvaluationContext taxEvaluationContext);
+		ICartBuilder AddOrUpdateShipment(ShipmentUpdateModel updateModel);
 
 		/// <summary>
 		/// Remove exist shipment from cart
 		/// </summary>
 		/// <param name="shipmentId"></param>
 		/// <returns></returns>
-		ICartBuilder RemoveShipment(string shipmentId, PromotionEvaluationContext promotionEvaluationContext, TaxEvaluationContext taxEvaluationContext);
+		ICartBuilder RemoveShipment(string shipmentId);
 
 		/// <summary>
 		/// Add or update payment in cart
@@ -115,7 +115,7 @@ namespace VirtoCommerce.CheckoutModule.Data.Builders
 		/// </summary>
 		/// <param name="cart"></param>
 		/// <returns></returns>
-		ICartBuilder MergeWithCart(ShoppingCart cart, PromotionEvaluationContext promotionEvaluationContext, TaxEvaluationContext taxEvaluationContext);
+		ICartBuilder MergeWithCart(ShoppingCart cart);
 
 		/// <summary>
 		/// Remove cart from service
@@ -134,7 +134,7 @@ namespace VirtoCommerce.CheckoutModule.Data.Builders
 		/// Returns all available shipment methods for current cart
 		/// </summary>
 		/// <returns></returns>
-		ICollection<ShippingRate> GetAvailableShippingRates(TaxEvaluationContext taxEvaluationContext);
+		ICollection<ShippingRate> GetAvailableShippingRates();
 
 		/// <summary>
 		/// Returns all available payment methods for current cart
@@ -146,13 +146,13 @@ namespace VirtoCommerce.CheckoutModule.Data.Builders
 		/// Evaluate marketing discounts for captured cart
 		/// </summary>
 		/// <returns></returns>
-		ICartBuilder EvaluatePromotions(PromotionEvaluationContext promotionEvaluationContext);
+		ICartBuilder EvaluatePromotions();
 
 		/// <summary>
 		/// Evaluate taxes  for captured cart
 		/// </summary>
 		/// <returns></returns>
-		ICartBuilder EvaluateTax(TaxEvaluationContext taxEvaluationContext);
+		ICartBuilder EvaluateTax();
 
 		//Save cart changes
 		void Save();
