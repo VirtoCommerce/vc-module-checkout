@@ -83,6 +83,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Builders\CardBuilder.cs" />
+    <Compile Include="Builders\CartValidator.cs" />
     <Compile Include="Builders\ICartBuilder.cs" />
     <Compile Include="Builders\ICartValidator.cs" />
     <Compile Include="Converters\CartLineItemConverter.cs" />
@@ -93,7 +94,12 @@
     <Compile Include="Model\AddItemModel.cs" />
     <Compile Include="Model\AnonymousComparer.cs" />
     <Compile Include="Model\AsyncLock.cs" />
+    <Compile Include="Model\CartContext.cs" />
     <Compile Include="Model\CollectionExtensions.cs" />
+    <Compile Include="Model\Country.cs" />
+    <Compile Include="Model\CountryRegion.cs" />
+    <Compile Include="Model\CreateOrderModel.cs" />
+    <Compile Include="Model\CreateOrderResult.cs" />
     <Compile Include="Model\EntryState.cs" />
     <Compile Include="Model\NullableAndEnumValueInjecter.cs" />
     <Compile Include="Model\PaymentUpdateModel.cs" />

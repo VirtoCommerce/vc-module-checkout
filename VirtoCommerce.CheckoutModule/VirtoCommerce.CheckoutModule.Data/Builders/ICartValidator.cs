@@ -6,6 +6,6 @@ namespace VirtoCommerce.CheckoutModule.Data.Builders
 {
     public interface ICartValidator
     {
-        Task Validate(ShoppingCart cart);
+        void Validate(ShoppingCart cart);
     }
 }

@@ -3,18 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using VirtoCommerce.CheckoutModule.Data.Converters;
 using VirtoCommerce.CheckoutModule.Data.Model;
-using VirtoCommerce.CheckoutModule.Data.Reward;
-using VirtoCommerce.CheckoutModule.Data.Tax;
 using VirtoCommerce.Domain.Cart.Services;
 using VirtoCommerce.Domain.Store.Services;
-using VirtoCommerce.Domain.Tax.Model;
 using VirtoCommerce.Domain.Cart.Model;
 using VirtoCommerce.Domain.Marketing.Services;
 using VirtoCommerce.Domain.Shipping.Model;
 using VirtoCommerce.Domain.Store.Model;
 using AnonymousComparer = VirtoCommerce.CheckoutModule.Data.Model.AnonymousComparer;
 using EntryState = VirtoCommerce.CheckoutModule.Data.Model.EntryState;
-using PromotionEvaluationContext = VirtoCommerce.Domain.Marketing.Model.PromotionEvaluationContext;
 using StringExtensions = VirtoCommerce.CheckoutModule.Data.Model.StringExtensions;
 
 namespace VirtoCommerce.CheckoutModule.Data.Builders
@@ -28,9 +24,10 @@ namespace VirtoCommerce.CheckoutModule.Data.Builders
 
 		private ShoppingCart _cart;
 
+		private Store _store;
+
 		[CLSCompliant(false)]
-		public CartBuilder(IStoreService storeService, IShoppingCartService shoppingShoppingCartService,
-			IShoppingCartSearchService shoppingCartSearchService, IMarketingPromoEvaluator marketingPromoEvaluator)
+		public CartBuilder(IStoreService storeService, IShoppingCartService shoppingShoppingCartService, IShoppingCartSearchService shoppingCartSearchService, IMarketingPromoEvaluator marketingPromoEvaluator)
 		{
 			_storeService = storeService;
 			_shoppingCartService = shoppingShoppingCartService;
@@ -46,18 +43,19 @@ namespace VirtoCommerce.CheckoutModule.Data.Builders
 			return this;
 		}
 
-		public virtual ICartBuilder GetOrCreateNewTransientCart(string storeId, string cartName, string customerId, string customerName, string currency, string languageCode)
+		public virtual ICartBuilder GetOrCreateNewTransientCart(CartContext cartContext)
 		{
-			var cart = GetCurrentCart(storeId, customerId, cartName);
+			var cart = GetCurrentCart(cartContext.CustomerId, cartContext.StoreId, cartContext.CartName);
 			if (cart == null)
 			{
 				cart = new ShoppingCart()
 				{
-					Name = cartName,
-					Currency = currency,
-					CustomerId = customerId,
-					CustomerName = customerName,
-					StoreId = storeId
+					Name = cartContext.CartName,
+					Currency = cartContext.Currency,
+					CustomerId = cartContext.CustomerId,
+					CustomerName = cartContext.CustomerName,
+					IsAnonymous = !cartContext.IsRegistered,
+					StoreId = cartContext.StoreId
 				};
 			}
 
@@ -80,6 +78,7 @@ namespace VirtoCommerce.CheckoutModule.Data.Builders
 				CatalogId = addItemModel.CatalogId,
 				Sku = addItemModel.Sku,
 				Name = addItemModel.Name,
+				ImageUrl = addItemModel.ImageUrl,
 				ListPrice = addItemModel.ListPrice,
 				SalePrice = addItemModel.SalePrice,
 				PlacedPrice = addItemModel.PlacedPrice,
@@ -300,12 +299,12 @@ namespace VirtoCommerce.CheckoutModule.Data.Builders
 			if (!string.IsNullOrEmpty(updateModel.PaymentGatewayCode))
 			{
 				var availablePaymentMethods = GetAvailablePaymentMethods();
-				var paymentMethod = availablePaymentMethods.FirstOrDefault(pm => string.Equals(pm.GatewayCode, updateModel.PaymentGatewayCode, StringComparison.InvariantCultureIgnoreCase));
+				var paymentMethod = availablePaymentMethods.FirstOrDefault(pm => string.Equals(pm.Code, updateModel.PaymentGatewayCode, StringComparison.InvariantCultureIgnoreCase));
 				if (paymentMethod == null)
 				{
 					throw new Exception("Unknown payment method " + updateModel.PaymentGatewayCode);
 				}
-				payment.PaymentGatewayCode = paymentMethod.GatewayCode;
+				payment.PaymentGatewayCode = paymentMethod.Code;
 			}
 
 			payment.OuterId = updateModel.OuterId;
@@ -316,7 +315,6 @@ namespace VirtoCommerce.CheckoutModule.Data.Builders
 
 		public virtual ICartBuilder MergeWithCart(ShoppingCart cart)
 		{
-
 			foreach (var lineItem in cart.Items)
 			{
 				AddLineItem(lineItem);
@@ -414,12 +412,10 @@ namespace VirtoCommerce.CheckoutModule.Data.Builders
 
 		public virtual ICollection<ShippingRate> GetAvailableShippingRates()
 		{
-			var store = _storeService.GetById(_cart.StoreId);
-
 			// TODO: Remake with shipmentId
 			var evalContext = new ShippingEvaluationContext(_cart);
 
-			var activeAvailableShippingRates = store.ShippingMethods.Where(x => x.IsActive);
+			var activeAvailableShippingRates = Store.ShippingMethods.Where(x => x.IsActive);
 
 			var availableShippingRates = activeAvailableShippingRates
 				.SelectMany(x => x.CalculateRates(evalContext))
@@ -444,11 +440,9 @@ namespace VirtoCommerce.CheckoutModule.Data.Builders
 			return availableShippingRates;
 		}
 
-		public virtual ICollection<PaymentMethod> GetAvailablePaymentMethods()
+		public virtual ICollection<Domain.Payment.Model.PaymentMethod> GetAvailablePaymentMethods()
 		{
-			var store = _storeService.GetById(_cart.StoreId);
-
-			return store.PaymentMethods.Where(x => x.IsActive).Select(x=>x.ToCartModel()).ToList();
+			return Store.PaymentMethods.Where(x => x.IsActive).ToList();
 		}
 
 		public virtual ICartBuilder EvaluatePromotions()
@@ -465,9 +459,7 @@ namespace VirtoCommerce.CheckoutModule.Data.Builders
 
 		public ICartBuilder EvaluateTax()
 		{
-			var store = _storeService.GetById(_cart.StoreId);
-
-			var activeTaxProvider = store.TaxProviders.FirstOrDefault(x => x.IsActive);
+			var activeTaxProvider = Store.TaxProviders.FirstOrDefault(x => x.IsActive);
 			if (activeTaxProvider != null)
 			{
 				var taxEvaluationContext = _cart.ToTaxEvalContext();
@@ -498,6 +490,18 @@ namespace VirtoCommerce.CheckoutModule.Data.Builders
 			get
 			{
 				return _cart;
+			}
+		}
+
+		public Store Store
+		{
+			get
+			{
+				if (_store == null)
+				{
+					_store = _storeService.GetById(_cart.StoreId);
+				}
+				return _store;
 			}
 		}
 

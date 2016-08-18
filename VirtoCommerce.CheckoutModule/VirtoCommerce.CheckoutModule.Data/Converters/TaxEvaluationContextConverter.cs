@@ -22,77 +22,82 @@ namespace VirtoCommerce.CheckoutModule.Data.Converters
 				Lines = new List<TaxLine>()
 			};
 
-			foreach (var lineItem in cart.Items)
+			if (cart.Items != null)
 			{
-				var extendedTaxLine = new TaxLine
+				foreach (var lineItem in cart.Items)
 				{
-					Id = lineItem.Id + "&extended",
-					Code = lineItem.Sku,
-					Name = lineItem.Name,
-					TaxType = lineItem.TaxType,
-					Amount = lineItem.ExtendedPrice
-				};
-				retVal.Lines.Add(extendedTaxLine);
-
-				var listTaxLine = new TaxLine
-				{
-					Id = lineItem.Id + "&list",
-					Code = lineItem.Sku,
-					Name = lineItem.Name,
-					TaxType = lineItem.TaxType,
-					Amount = lineItem.ListPrice
-				};
-				retVal.Lines.Add(listTaxLine);
-
-				if (lineItem.ListPrice != lineItem.SalePrice)
-				{
-					var saleTaxLine = new TaxLine
+					var extendedTaxLine = new TaxLine
 					{
-						Id = lineItem.Id + "&sale",
+						Id = lineItem.Id + "&extended",
 						Code = lineItem.Sku,
 						Name = lineItem.Name,
 						TaxType = lineItem.TaxType,
-						Amount = lineItem.SalePrice
+						Amount = lineItem.ExtendedPrice
 					};
-					retVal.Lines.Add(saleTaxLine);
-				}
+					retVal.Lines.Add(extendedTaxLine);
 
+					var listTaxLine = new TaxLine
+					{
+						Id = lineItem.Id + "&list",
+						Code = lineItem.Sku,
+						Name = lineItem.Name,
+						TaxType = lineItem.TaxType,
+						Amount = lineItem.ListPrice
+					};
+					retVal.Lines.Add(listTaxLine);
+
+					if (lineItem.ListPrice != lineItem.SalePrice)
+					{
+						var saleTaxLine = new TaxLine
+						{
+							Id = lineItem.Id + "&sale",
+							Code = lineItem.Sku,
+							Name = lineItem.Name,
+							TaxType = lineItem.TaxType,
+							Amount = lineItem.SalePrice
+						};
+						retVal.Lines.Add(saleTaxLine);
+					}
+				}
 			}
 
-			foreach (var shipment in cart.Shipments)
+			if (cart.Shipments != null)
 			{
-				var totalTaxLine = new TaxLine
+				foreach (var shipment in cart.Shipments)
 				{
-					Id = shipment.Id + "&total",
-					Code = shipment.ShipmentMethodCode,
-					Name = shipment.ShipmentMethodCode,
-					TaxType = shipment.TaxType,
-					Amount = shipment.Total
-				};
-				retVal.Lines.Add(totalTaxLine);
-				var priceTaxLine = new TaxLine
-				{
-					Id = shipment.Id + "&price",
-					Code = shipment.ShipmentMethodCode,
-					Name = shipment.ShipmentMethodCode,
-					TaxType = shipment.TaxType,
-					Amount = shipment.ShippingPrice
-				};
-				retVal.Lines.Add(priceTaxLine);
+					var totalTaxLine = new TaxLine
+					{
+						Id = shipment.Id + "&total",
+						Code = shipment.ShipmentMethodCode,
+						Name = shipment.ShipmentMethodCode,
+						TaxType = shipment.TaxType,
+						Amount = shipment.Total
+					};
+					retVal.Lines.Add(totalTaxLine);
+					var priceTaxLine = new TaxLine
+					{
+						Id = shipment.Id + "&price",
+						Code = shipment.ShipmentMethodCode,
+						Name = shipment.ShipmentMethodCode,
+						TaxType = shipment.TaxType,
+						Amount = shipment.ShippingPrice
+					};
+					retVal.Lines.Add(priceTaxLine);
 
-				if (shipment.DeliveryAddress != null)
-				{
-					//*** alex fix shipping address & customerId to the taxevalcontext
-					retVal.Address = shipment.DeliveryAddress;
-					retVal.Address.AddressType = shipment.DeliveryAddress.AddressType;
+					if (shipment.DeliveryAddress != null)
+					{
+						//*** alex fix shipping address & customerId to the taxevalcontext
+						retVal.Address = shipment.DeliveryAddress;
+						retVal.Address.AddressType = shipment.DeliveryAddress.AddressType;
+					}
+
+					retVal.Customer = new Contact
+					{
+						Id = cart.CustomerId,
+						Name = cart.CustomerName
+					};
+					//*** end alex fix shipping address & customerId to the taxevalcontext
 				}
-
-				retVal.Customer = new Contact
-				{
-					Id = cart.CustomerId,
-					Name = cart.CustomerName
-				};
-				//*** end alex fix shipping address & customerId to the taxevalcontext
 			}
 
 			return retVal;

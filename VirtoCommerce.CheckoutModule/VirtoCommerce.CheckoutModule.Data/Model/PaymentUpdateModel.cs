@@ -4,6 +4,8 @@ namespace VirtoCommerce.CheckoutModule.Data.Model
 {
     public class PaymentUpdateModel
     {
+		public CartContext CartContext { get; set; }
+
         public string Id { get; set; }
 
         public string OuterId { get; set; }

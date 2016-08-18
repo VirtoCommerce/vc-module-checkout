@@ -8,7 +8,11 @@ namespace VirtoCommerce.CheckoutModule.Data.Model
 {
 	public class AddItemModel
 	{
+		public CartContext CartContext { get; set; }
+
 		public string ProductId { get; set; }
+
+		public string ImageUrl { get; set; }
 
 		public int Quantity { get; set; }
 

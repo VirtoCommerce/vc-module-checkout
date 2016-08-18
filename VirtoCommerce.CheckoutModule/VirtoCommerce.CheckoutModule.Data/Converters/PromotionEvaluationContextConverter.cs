@@ -13,7 +13,12 @@ namespace VirtoCommerce.CheckoutModule.Data.Converters
 	{
 		public static PromotionEvaluationContext ToPromotionEvaluationContext(this ShoppingCart cart)
 		{
-			var promotionItems = cart.Items.Select(i => i.ToPromotionItem()).ToList();
+			List<ProductPromoEntry> promotionItems = null;
+
+			if (cart.Items != null)
+			{
+				promotionItems = cart.Items.Select(i => i.ToPromotionItem()).ToList();
+			}
 
 			var retVal = new PromotionEvaluationContext
 			{

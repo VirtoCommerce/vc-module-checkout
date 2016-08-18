@@ -28,14 +28,9 @@ namespace VirtoCommerce.CheckoutModule.Data.Builders
 		/// <summary>
 		/// Load or created new cart for current user and capture it
 		/// </summary>
-		/// <param name="customerName"></param>
-		/// <param name="cartName"></param>
-		/// <param name="currency"></param>
-		/// <param name="storeId"></param>
-		/// <param name="customerId"></param>
-		/// <param name="languageCode"></param>
+		/// <param name="cartContext"></param>
 		/// <returns></returns>
-		ICartBuilder GetOrCreateNewTransientCart(string storeId, string cartName, string customerId, string customerName, string currency, string languageCode);
+		ICartBuilder GetOrCreateNewTransientCart(CartContext cartContext);
 
 		/// <summary>
 		/// Add new product to cart
@@ -140,7 +135,7 @@ namespace VirtoCommerce.CheckoutModule.Data.Builders
 		/// Returns all available payment methods for current cart
 		/// </summary>
 		/// <returns></returns>
-		ICollection<PaymentMethod> GetAvailablePaymentMethods();
+		ICollection<Domain.Payment.Model.PaymentMethod> GetAvailablePaymentMethods();
 
 		/// <summary>
 		/// Evaluate marketing discounts for captured cart
@@ -158,5 +153,7 @@ namespace VirtoCommerce.CheckoutModule.Data.Builders
 		void Save();
 
 		ShoppingCart Cart { get; }
+
+		Store Store { get; }
 	}
 }

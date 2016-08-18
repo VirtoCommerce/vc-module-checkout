@@ -227,9 +227,17 @@ namespace VirtoCommerce.CheckoutModule.Test
 
 			var builder = new CartBuilder(storeService, shoppingCartService, shoppingCartSearchService, marketingPromoEvaluator);
 
-			var customerId = Guid.NewGuid().ToString();
+			var cartContext = new CartContext()
+			{
+				StoreId = StoreId,
+				CartName = CartName,
+				CustomerId = Guid.NewGuid().ToString(),
+				CustomerName = Guid.NewGuid().ToString(),
+				Currency = CurrencyCode,
+				LanguageCode = LanguageCode
+			};
 
-			builder.GetOrCreateNewTransientCart(StoreId, CartName, customerId, customerId, CurrencyCode, LanguageCode).Save();
+			builder.GetOrCreateNewTransientCart(cartContext).Save();
 
 			return builder;
 		}

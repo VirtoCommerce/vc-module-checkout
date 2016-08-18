@@ -10,6 +10,8 @@ namespace VirtoCommerce.CheckoutModule.Data.Model
             Items = new List<ShipmentItemUpdateModel>();
         }
 
+		public CartContext CartContext { get; set; }
+
         public string Id { get; set; }
 
         public string ShipmentMethodCode { get; set; }
